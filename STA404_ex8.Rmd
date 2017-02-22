@@ -1,0 +1,120 @@
+---
+title: "STA404 Clinical Biostatistics - Exercices"
+subtitle: 'Exercices-8'
+author: Laura Barras
+output: pdf_document
+---
+
+```{r, include=FALSE}
+library("Epi")
+library("biostatUZH")
+library("beeswarm")
+library("nparcomp")
+```
+
+#Exercise 1
+
+```{r}
+##a-b calculation
+
+cn<-c("teeth with WSL","Teeth without WSL")
+rn<-c("Toothpaste A","Toothpaste B")
+dat<-c(13,20,284,262)
+
+data<-matrix(dat,2)
+rownames(data)<-rn
+colnames(data)<-cn
+data
+
+p1<-0.0438
+p2<-0.0709
+n1<-13+284
+n2<-20+262
+se<-sqrt(((p1*(1-p1))/(n1))+((p2*(1-p2))/(n2)))
+11.5
+
+0.0438-0.0709
+-0.0271+1.96*se
+-0.0271-1.96*se
+
+##c
+confIntRiskDiff(c(13,20),c(n1,n2))
+
+##d calculation
+1/0.0271
+1/(-0.0271+1.96*se)
+1/(-0.0271-1.96*se)$
+
+##e 
+(13*262)/(20*284)
+(9*132)/(19*153)
+twoby2(data)
+sqrt(sum(1/dat))
+exp(log(0.6)+1.96*sqrt(sum(1/dat)))
+exp(log(0.6)-1.96*sqrt(sum(1/dat)))
+
+0.6*exp(1.96*sqrt(sum(1/dat)))
+0.6/exp(1.96*sqrt(sum(1/dat)))
+```
+
+#Exercise 2
+```{r}
+##a
+cn<-c("No relapse","Relapse")
+rn<-c("New treatment","Standard")
+dat<-c(15,7,10,19)
+data<-matrix(dat,2)
+rownames(data)<-rn
+colnames(data)<-cn
+data
+
+chisq.test(data)
+chisq.test(data, correct = FALSE)
+
+##b
+fisher.test(data)
+twoby2(data)
+
+# all tests indicate that we can reject the null hypothesis and that the tue odds ratio is not equal to 1. The new treatment is better than the standard, four times more effective (odds ratio = 4, 95% CI from 1.2 to 13.2)
+```
+
+
+#Exercise 3
+
+```{r}
+
+severity<-c("mild","mild","sever","sever")
+treatment<-c("Mlz","Vm","Mlz","Vm")
+cured<-as.numeric(c(37,39,29,30))
+not.cured<-as.numeric(c(4,1,9,1))
+
+data<-data.frame(severity,treatment,cured,not.cured)
+print(data)
+
+##a
+m1 <- glm(cbind(cured, not.cured) ~ treatment,data=data, family=binomial)
+tableRegression(m1)
+
+##b
+m.mild <- glm(cbind(cured, not.cured) ~ treatment, subset=(severity=="mild"),data=data, family=binomial)
+tableRegression(m.mild)
+
+m.sever <- glm(cbind(cured, not.cured) ~ treatment,subset=(severity=="sever"),data=data, family=binomial)
+tableRegression(m.sever)
+
+#The treatment is effective only in the sever cases
+
+##c
+x <- xtabs(cured ~ severity +treatment, data=data)
+n.x <- xtabs(not.cured ~severity+treatment, data=data)
+mh1 <- mh(x, n.x, comp=2, lev=c(2,1), conf=0.95, coh=FALSE)
+print(t(mh1[8:11]))
+
+#the Mantel-Haenszel estimate is OR= 6.66 with 95%CI 1.37 to 32.37
+
+##d
+l1 <- glm(cbind(cured, not.cured) ~ treatment+ severity,data=data, family=binomial)
+tableRegression(l1)
+#agrees with MH.
+```
+
